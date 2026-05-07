@@ -1,0 +1,22 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "type": "text",
+          "text": "你将根据给定的用户轨迹数据回答三个问题。\n\n轨迹数据说明：\n轨迹是一个按时间排序的事件数组，每条事件包含以下字段：\n- seq_no: 事件序号（按时间排序）\n- event_type: 事件类型，\"stay\"表示驻留（用户在某地停留一段时间），\"action\"表示出行动作（如导航、打车、搜索等）\n- event_time_start / event_time_end: 事件的起止时间。stay 有明确的起止时间段；action 只有 event_time_start\n- action_type: 具体动作类型（stay/navi/taxi/search/poi_detail 等）\n- travel_mode: 出行方式（car/foot/ride/motor/bus/truck 等，仅 action 有效）\n- user_adcode: 用户所在城市区域编码\n- start_poi_name: 出发地 POI 名称（仅 action 可能有值）\n- start_poi_tag: 出发地 POI 分类标签（仅 action 可能有值）\n- end_poi_name: 目的地 POI 名称（仅 action 可能有值）\n- end_poi_tag: 目的地 POI 分类标签（仅 action 可能有值）\n- stay_poi_name: 驻留地 POI 名称（仅 stay 有值，判断用户所在位置的核心字段）\n- stay_poi_tag: 驻留地 POI 分类标签（仅 stay 有值）\n- location_type: 位置类型（本地/异地行前/异地行中 等）\n- is_arrive: 是否到达目的地（1=到达，0=未到达，仅部分 action 有效）\n- duration: 持续时间（秒）\n- distance: 实际距离（km）\n- weather: 当时的天气\n\n注意：轨迹中 POI 字段按 event_type 拆分：\n- action 事件的 POI 在 end_poi_name / end_poi_tag 中\n- stay 事件的 POI 在 stay_poi_name / stay_poi_tag 中\n- 提及\"POI名称\"时，需根据 event_type 取对应字段"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "轨迹数据：\n{{trajectory_data}}\n\n问题1: 用户在 {{q1_query_time}} 时刻在什么POI？\n问题2: 用户在 {{q2_query_poi}} 的时间段有哪些？\n问题3: 用户在 {{q4_query_start_time}} 到 {{q4_query_end_time}} 之间最感兴趣的POI是什么？频次多少？\n\n请严格遵守以下规则：\n1. 回答必须且只能基于给定的轨迹数据，不要使用外部知识。\n2. 判断用户所在 POI 时，对于 stay 记录取 stay_poi_name，对于 action 记录取 end_poi_name。不要把 tag 字段当作 POI 名称。\n3. 判断用户在某时刻所在的 POI：找到 event_type=\"stay\" 且该时刻落在 event_time_start 与 event_time_end 之间的记录，取其 stay_poi_name。\n4. 查询某 POI 的时间段：找出所有 event_type=\"stay\" 且 stay_poi_name 与查询 POI 匹配的记录，返回每条的 event_time_start 和 event_time_end。若同一 POI 出现多次，返回全部时间段。\n5. 统计\"最感兴趣的 POI\"时，兴趣次数的计算规则：\n   - 对于 stay 记录：stay_poi_name 非空即计一次。\n   - 对于 action 记录：end_poi_name 非空即计一次。\n   - 即搜索、点击、导航、驻留等所有行为都算。\n6. 是否计入查询时间段，统一按该记录的 event_time_start 是否落在查询区间 [query_start_time, query_end_time] 内判断。\n7. 若次数并列，输出所有并列的 POI。\n8. 请按指定格式逐题回答，只输出答案，不要解释推理过程。\n\n请严格按以下JSON格式回答，不要输出JSON以外的任何内容：\n{\n  \"answer1\": \"POI名称\",\n  \"answer2\": [{\"start\": \"起始时间\", \"end\": \"结束时间\"}, ...],\n  \"answer3\": {\"poi\": [\"POI名称1\", \"POI名称2\", ...], \"count\": 次数}\n}"
+        }
+      ]
+    }
+  ]
+}

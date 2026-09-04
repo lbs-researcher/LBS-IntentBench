@@ -1,0 +1,22 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "type": "text",
+          "text": "你是一个出行行为分析助手，擅长根据用户的历史出行轨迹推断出行动机。\n\n轨迹数据说明：\n轨迹是用户在出行前的历史行为记录（按时间排序的事件数组，JSON格式），包含搜索、导航、打车、驻留等行为。注意：轨迹中的所有事件都发生在本次出行之前。每条事件可能包含以下字段：\n- seq_no: 事件序号（按时间排序）\n- event_type: 事件类型，\"stay\"表示驻留（用户在某地停留一段时间），\"action\"表示出行动作（如导航、打车、搜索等）\n- event_time_start / event_time_end: 事件的起止时间。stay 有明确的起止时间段；action 只有 event_time_start\n- action_type: 具体动作类型（stay/navi/taxi/search/poi_detail/route 等）\n- travel_mode: 出行方式（car/foot/ride/motor/bus/truck 等，仅 action 有效）\n- user_adcode: 用户所在城市区域编码\n- start_poi_name / start_poi_tag: 出发地 POI 名称和分类标签（仅 action 可能有值）\n- end_poi_name / end_poi_tag: 目的地 POI 名称和分类标签（仅 action 可能有值）\n- stay_poi_name / stay_poi_tag: 驻留地 POI 名称和分类标签（仅 stay 有值）\n- location_type: 位置类型（本地/异地行前/异地行中 等）\n- is_arrive: 是否到达目的地（1=到达，0=未到达，仅部分 action 有效）\n- duration: 持续时间（秒）\n- distance: 实际距离（km）\n- weather: 当时的天气"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "下面是一位用户在本次出行之前的历史出行轨迹数据（轨迹中所有事件均早于本次出行时间）：\n{{trajectory_data}}\n\n请根据以上轨迹，判断该用户在 {{query_event_time}} 前往{{query_poi_name}}（类型：{{query_poi_tag}}）的出行理由可能包含以下哪些？（多选，可同时选择多个符合的理由）\n\nA. 通勤：目的地是用户日常固定往返的家或工作地点。通常表现为跨越多天的规律性往返模式，在该地点有长时间的驻留记录。注意：仅凭目的地是住宅区或写字楼不能简单判定为通勤。\nB. 短期意图：用户在本次出行前12小时以内（但不少于15分钟）对同一目的地POI有过交互行为（如搜索、浏览详情、查看路线等），属于临时起意或近期计划的出行。\nC. 常去地：目的地是用户经常前往的地方，在轨迹中有多次导航、出行或驻留记录。注意：家和公司也可以同时是常去地。\nD. 探索：目的地是用户此前从未在轨迹中出现过的全新地点，属于首次前往。\n\n注意事项：\n- 一个出行行为可能同时符合多个理由（D除外）。例如：去公司前搜了路况，则同时符合A和B；搜了一个常去的餐厅然后前往，则同时符合B和C。\n- D（探索）与其他选项互斥：如果目的地从未在轨迹中出现过，只能选D。\n- 请综合分析轨迹中的出行模式、频率、时间规律等信息进行判断，选出所有符合的理由。\n\n请选出所有符合的选项，仅输出JSON格式的答案，不要输出其他内容：\n{\"answer\": \"选项字母组合，如AC\"}"
+        }
+      ]
+    }
+  ]
+}

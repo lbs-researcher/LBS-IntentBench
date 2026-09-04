@@ -1,0 +1,22 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "type": "text",
+          "text": "你是一个出行数据质量检测专家。下面是一段真实的用户出行事件记录（约20条按时间排序的连续事件）。\n\n请你对其中**1条记录**做**1处微妙的修改**，使这段记录从整体上看变得不合理。修改应当需要一定的常识推理才能发现，而不是一眼就能看出的数值异常。\n\n事件记录字段说明：\n- seq_no: 事件序号（按时间排序）\n- event_type: 事件类型，\"stay\"表示驻留（用户在某地停留一段时间），\"action\"表示出行动作（如导航、打车、搜索等）\n- event_time_start / event_time_end: 事件的起止时间。stay 有明确的起止时间段；action 只有 event_time_start\n- action_type: 具体动作类型（stay/navi/taxi/search/poi_detail 等）\n- travel_mode: 出行方式（car/foot/ride/motor/bus/truck 等，仅 action 有效）\n- user_adcode: 用户所在城市区域编码\n- start_poi_name: 出发地 POI 名称（仅 action 可能有值）\n- start_poi_tag: 出发地 POI 分类标签（仅 action 可能有值）\n- end_poi_name: 目的地 POI 名称（仅 action 可能有值）\n- end_poi_tag: 目的地 POI 分类标签（仅 action 可能有值）\n- stay_poi_name: 驻留地 POI 名称（仅 stay 有值，判断用户所在位置的核心字段）\n- stay_poi_tag: 驻留地 POI 分类标签（仅 stay 有值）\n- location_type: 位置类型（本地/异地行前/异地行中 等）\n- is_arrive: 是否到达目的地（1=到达，0=未到达，仅部分 action 有效）\n- duration: 持续时间（秒）\n- distance: 实际距离（km）\n- weather: 当时的天气\n\n你可以从以下维度中选择一个进行篡改（不限于此，也可以自由发挥）：\n- **行为序列连贯性**：修改某条 action 记录的 end_poi_name，使其与前后事件的行为逻辑链断裂（如用户连续多条 search/poi_detail/route 都指向同一个目的地，将其中某条 route 的 end_poi_name 改为完全不相关的地点）。替换的 POI 应在同一城市内，不要跨城市修改\n- **时间合理性**：将正常营业时间的活动改到不合理的时段（如凌晨3点去商场购物、深夜去学校接孩子）\n- **天气-活动匹配**：将好天气改为极端天气，使户外活动在物理上不合理（如暴雨天骑行长距离、暴风雪中长时间户外步行）。注意：篡改后必须是物理上极不合理，而不仅仅是\"体验不好\"（如小雨步行800米吃饭是合理的）\n- **POI类型与行为矛盾**：将 end_poi_tag 改为与用户行为模式矛盾的类型（如用户明显在通勤，将公司改为景区；用户在接送孩子，将学校改为酒吧）\n- **驻留地与出行矛盾**：修改 stay 事件的 stay_poi_name/stay_poi_tag，使其与前后 action 的出发地/目的地产生逻辑矛盾（如用户前一个 action 到达了A地，紧接着的 stay 却在功能完全不同的B地；或 stay 的 POI 类型与用户在该时段的行为模式矛盾）\n\n注意事项：\n- 禁止制造\"时间倒流\"、\"时间段重叠\"等底层数据结构错误\n- 禁止修改 travel_mode、distance、duration、start_poi_name、start_poi_tag 等字段\n- 允许修改的字段：end_poi_name、end_poi_tag、stay_poi_name、stay_poi_tag、event_time_start、event_time_end、weather\n- 修改 POI 名称时，替换的 POI 应是同一城市内真实存在的、功能完全不同的独立 POI，不要在原 POI 名称基础上添加后缀（如快递柜、停车场等附属设施）。篡改的核心是制造需要常识推理才能发现的逻辑/语义层面的不合理\n\n要求：\n1. 只修改1条记录中的1-2个字段值，其余记录和字段保持原样\n2. 修改要微妙，需要结合上下文和常识才能判断出不合理\n3. 不要做过于明显的修改（如把距离改成10000km）\n4. 只输出被修改的那1条记录（完整的单条记录，包含所有字段），不要输出其余未修改的记录"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "原始事件片段：\n{{original_snippet}}\n\n请严格按以下JSON格式回答，不要输出JSON以外的任何内容：\n{\n  \"tampered_record\": {被修改的那1条完整记录，格式与输入中的单条记录一致，包含所有字段},\n  \"tamper_dimension\": \"篡改维度（如：行为序列连贯性/时间合理性/天气-活动匹配/POI类型与行为矛盾/驻留地与出行矛盾 等）\",\n  \"modified_seq_no\": 被修改的事件序号,\n  \"modified_fields\": [\"被修改的字段名列表\"],\n  \"reason\": \"简要说明为什么修改后的记录不合理（需要什么常识推理才能发现）\"\n}"
+        }
+      ]
+    }
+  ]
+}

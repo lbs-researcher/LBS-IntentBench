@@ -1,0 +1,22 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "type": "text",
+          "text": "你将根据给定的用户历史轨迹数据，归纳该用户在常住地的出行偏好。\n\n轨迹数据说明：\n轨迹是一个按时间排序的事件数组，每条事件包含以下字段：\n- seq_no: 事件序号（按时间排序）\n- event_type: 事件类型，\"stay\"表示驻留（用户在某地停留一段时间），\"action\"表示出行动作（如导航、打车、搜索等）\n- event_time_start / event_time_end: 事件的起止时间。stay 有明确的起止时间段；action 只有 event_time_start\n- action_type: 具体动作类型（stay/navi/taxi/search/poi_detail 等）\n- travel_mode: 出行方式（car/foot/ride/motor/bus/truck 等，仅 action 有效）\n- user_adcode: 用户所在城市区域编码\n- start_poi_name: 出发地 POI 名称（仅 action 可能有值）\n- start_poi_tag: 出发地 POI 分类标签（仅 action 可能有值）\n- end_poi_name: 目的地 POI 名称（仅 action 可能有值）\n- end_poi_tag: 目的地 POI 分类标签（仅 action 可能有值）\n- stay_poi_name: 驻留地 POI 名称（仅 stay 有值，判断用户所在位置的核心字段）\n- stay_poi_tag: 驻留地 POI 分类标签（仅 stay 有值）\n- location_type: 位置类型（本地/异地行前/异地行中 等）\n- is_arrive: 是否到达目的地（1=到达，0=未到达，仅部分 action 有效）\n- duration: 持续时间（秒）\n- distance: 实际距离（km）\n- weather: 当时的天气"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "历史轨迹数据：\n{{history_trajectory}}\n\n问题1: 该用户在常住地最常使用的出行方式是什么？请只回答一种出行方式。\n\n问题2: 该用户在常住地前往\"{{query_dest_type}}\"类型的目的地时，最常使用什么出行方式？请只回答一种出行方式。\n\n请严格遵守以下规则：\n1. 分析必须基于给定的历史轨迹数据中体现的实际行为模式。\n2. 只关注常住地（本地）的出行行为，忽略异地出行。\n3. 回答中的出行方式必须从以下类别中选择：驾车、步行、公共交通、骑行、摩托车。请根据轨迹中的 travel_mode 字段和 action_type 字段自行判断每条记录属于哪个类别。\n4. 请按指定格式回答，不要解释推理过程。\n请严格按以下JSON格式回答，不要输出JSON以外的任何内容：\n{\n  \"answer1\": \"出行方式\",\n  \"answer2\": \"出行方式\"\n}\n"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "type": "text",
+          "text": "你将根据给定的用户历史轨迹数据，预测用户接下来最可能的出行行为。\n\n轨迹数据说明：\n轨迹是一个按时间排序的事件数组，每条事件包含以下字段：\n- seq_no: 事件序号（按时间排序）\n- event_type: 事件类型，\"stay\"表示驻留（用户在某地停留一段时间），\"action\"表示出行动作（如导航、打车、搜索等）\n- event_time_start / event_time_end: 事件的起止时间。stay 有明确的起止时间段；action 只有 event_time_start\n- action_type: 具体动作类型（stay/navi/taxi/search/poi_detail 等）\n- travel_mode: 出行方式（car/foot/ride/motor/bus/truck 等，仅 action 有效）\n- user_adcode: 用户所在城市区域编码\n- start_poi_name: 出发地 POI 名称（仅 action 可能有值）\n- start_poi_tag: 出发地 POI 分类标签（仅 action 可能有值）\n- end_poi_name: 目的地 POI 名称（仅 action 可能有值）\n- end_poi_tag: 目的地 POI 分类标签（仅 action 可能有值）\n- stay_poi_name: 驻留地 POI 名称（仅 stay 有值，判断用户所在位置的核心字段）\n- stay_poi_tag: 驻留地 POI 分类标签（仅 stay 有值）\n- location_type: 位置类型（本地/异地行前/异地行中 等）\n- is_arrive: 是否到达目的地（1=到达，0=未到达，仅部分 action 有效）\n- duration: 持续时间（秒）\n- distance: 实际距离（km）\n- weather: 当时的天气"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "\n历史轨迹数据：\n{{history_trajectory}}\n\n当前状态：\n- 当前时间：{{current_time}}\n- 当前地点：{{current_poi}}\n\n问题1: 根据用户的历史行为模式，预测用户接下来最可能前往哪个目的地？请从历史出现过的POI中选择一个最可能的答案，直接输出POI名称。\n\n问题2: 根据用户的历史行为模式，预测用户接下来最可能前往的目的地属于哪种类型？请从历史出现过的POI类型标签中选择一个最可能的答案，直接输出类型标签。\n\n请严格遵守以下规则：\n1. 预测必须基于给定的历史轨迹数据中体现的用户行为模式，结合当前时间和地点进行推理。\n2. 两道题均为问答题，必须从历史轨迹中出现过的POI/类型标签中选择一个作为答案，直接输出名称，不要输出历史中未出现过的POI或标签。\n3. 请按指定格式逐题回答，只输出答案，不要解释推理过程。\n请严格按以下JSON格式回答，不要输出JSON以外的任何内容：\n{\n  \"answer1\": \"POI名称\",\n  \"answer2\": \"类型标签\"\n}"
+        }
+      ]
+    }
+  ]
+}
